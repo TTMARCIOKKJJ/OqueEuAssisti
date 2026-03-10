@@ -10,6 +10,20 @@
 
     <script>
           window.history.pushState({}, "", "/dashboard");
+          const token = localStorage.getItem("token");
+var item = {
+    title: "Interestelar",
+    rating: 10
+  };
+fetch("/api/update", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer " + token
+  },
+  
+  body: JSON.stringify({item})
+});
     </script>
 </body>
 </html>

@@ -177,7 +177,7 @@
         <h2>Criar sua conta</h2>
         <p class="subtitle">Comece a catalogar sua jornada cinéfila.</p>
 
-        <form>
+        <form id="loginForm">
             <div class="form-row">
                 <div class="form-group">
                     <label for="name">Nome</label>
@@ -218,5 +218,40 @@
         </div>
     </div>
 
+    <script>
+        function register(event) {
+
+    event.preventDefault();
+
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    const username = document.getElementById("username").value;
+    const name = document.getElementById("name").value;
+
+    fetch('/api/register', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password, username, name })
+    })
+    
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Conta criada com sucesso! Faça login para começar a usar.');
+            window.location.href = '/login';
+        } else {
+            alert('Erro ao criar conta: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Erro ao criar conta:', error);
+        alert('Desculpe, ocorreu um erro ao tentar criar sua conta. Por favor, tente novamente mais tarde.');
+    });
+        }
+
+        document.getElementById("loginForm").addEventListener("submit", register);
+    </script>
 </body>
 </html>
