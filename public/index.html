@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>O que eu assisti</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <meta http-equiv="Content-Security-Policy"
+content="
+default-src 'self';
+script-src 'self' 'unsafe-inline';
+style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+font-src https://fonts.gstatic.com;
+connect-src 'self';
+img-src 'self' https://images.unsplash.com;
+">
+    <style>
+        /* Reset básico e Variáveis */
+        :root {
+            --bg-color: #0f1115;
+            --text-color: #f8fafc;
+            --primary-color: #6366f1; /* Roxo moderno */
+            --primary-hover: #4f46e5;
+            --secondary-bg: #1e2128;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        /* Menu de Navegação */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 5%;
+            background-color: rgba(15, 17, 21, 0.9);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-color);
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: var(--primary-color);
+        }
+
+        /* Seção de Apresentação (Hero) */
+        .hero {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 100vh;
+            padding: 100px 5% 50px;
+            gap: 40px;
+        }
+
+        .hero-text {
+            flex: 1;
+            max-width: 600px;
+        }
+
+        .hero-text h1 {
+            font-size: 3.5rem;
+            line-height: 1.2;
+            margin-bottom: 20px;
+        }
+
+        .hero-text p {
+            font-size: 1.2rem;
+            color: #94a3b8;
+            margin-bottom: 30px;
+        }
+
+        .hero-image {
+            flex: 1;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        /* Usando uma imagem genérica de cinema do Unsplash para ilustrar */
+        .hero-image img {
+            width: 100%;
+            max-width: 500px;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(99, 102, 241, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .hero-image img:hover {
+            transform: translateY(-10px);
+        }
+
+        /* Botões */
+        .btn {
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            transform: scale(1.05);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Chamada Final (Bottom CTA) */
+        .bottom-cta {
+            background-color: var(--secondary-bg);
+            text-align: center;
+            padding: 80px 5%;
+            margin-top: 50px;
+        }
+
+        .bottom-cta h2 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        .bottom-cta p {
+            color: #94a3b8;
+            margin-bottom: 40px;
+            font-size: 1.1rem;
+        }
+
+        .auth-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        /* Rodapé */
+        footer {
+            text-align: center;
+            padding: 20px;
+            background-color: var(--bg-color);
+            color: #64748b;
+            font-size: 0.9rem;
+            border-top: 1px solid #1e293b;
+        }
+
+        /* Responsividade para Celulares */
+        @media (max-width: 768px) {
+            .hero {
+                flex-direction: column;
+                text-align: center;
+                padding-top: 120px;
+            }
+
+            .hero-text h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero-image {
+                justify-content: center;
+                margin-top: 30px;
+            }
+
+            .bottom-cta h2 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="#" class="logo">O que eu <span>assisti</span></a>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-text">
+            <h1>O seu diário definitivo de filmes e séries</h1>
+            <p>Guarde tudo o que você já assistiu, avalie seus episódios favoritos e nunca mais esqueça em qual temporada você parou.</p>
+            <a href="#cadastro" class="btn btn-primary">Começar meu diário</a>
+        </div>
+        
+        <div class="hero-image">
+            <img src="./src/Gemini_Generated_Image_yn3dpayn3dpayn3d.png" alt="Pipoca e óculos 3D de cinema">
+        </div>
+    </section>
+
+    <section class="bottom-cta" id="cadastro">
+        <h2>Pronto para iniciar sua maratona?</h2>
+        <p>Junte-se a nós e comece a organizar o seu catálogo pessoal hoje mesmo.</p>
+        
+        <div class="auth-buttons">
+            <a onclick="login()" class="btn btn-outline">Entrar na minha conta</a>
+            <a href="#" class="btn btn-primary">Criar Conta Grátis</a>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 O que eu assisti. Todos os direitos reservados.</p>
+    </footer>
+
+    <script>
+        function login() {
+            try {
+                fetch('/login')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Erro ao carregar a página de login');
+                        }
+                        return response.text();
+                    })
+                    .then(html => {
+                        document.open();
+                        document.write(html);
+                        document.close();
+                    })
+                    .catch(error => {
+                        console.error('Erro ao redirecionar para a página de login:', error);
+                        alert('Desculpe, ocorreu um erro ao tentar acessar a página de login. Por favor, tente novamente mais tarde.');
+                    });
+            } catch (error) {
+                console.error('Erro ao redirecionar para a página de login:', error);
+                alert('Desculpe, ocorreu um erro ao tentar acessar a página de login. Por favor, tente novamente mais tarde.');
+            }
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "name": "oqueeuassisti",
+  "version": "1.0.0",
+  "description": "site para salvar tudo que assistiu",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "ttmarciokkjj",
+  "license": "ISC",
+  "dependencies": {
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongodb": "^7.1.0",
+    "nodemon": "^3.1.14"
+  }
+}

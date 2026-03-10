@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - O que eu assisti</title>
+    <meta http-equiv="Content-Security-Policy"
+content="
+default-src 'self';
+script-src 'self' 'unsafe-inline';
+style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+font-src https://fonts.gstatic.com;
+connect-src 'self';
+img-src 'self' https://images.unsplash.com;
+">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f1115;
+            --card-bg: rgba(30, 33, 40, 0.8);
+            --primary-color: #6366f1;
+            --primary-hover: #4f46e5;
+            --text-color: #f8fafc;
+            --input-bg: #1a1d23;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(rgba(15, 17, 21, 0.8), rgba(15, 17, 21, 0.8)), 
+                        url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-color);
+        }
+
+        .login-container {
+            background: var(--card-bg);
+            backdrop-filter: blur(15px);
+            padding: 40px;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        .login-container h2 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .login-container p {
+            color: #94a3b8;
+            margin-bottom: 30px;
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            color: #cbd5e1;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            background: var(--input-bg);
+            color: white;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            border-color: var(--primary-color);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn-login:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        .extra-links {
+            margin-top: 25px;
+            font-size: 0.85rem;
+        }
+
+        .extra-links a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .extra-links a:hover {
+            text-decoration: underline;
+        }
+
+        .back-home {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="index.html" class="back-home">← Voltar ao início</a>
+
+    <div class="login-container">
+        <h2>Bem-vindo de volta</h2>
+        <p>Acesse seu diário de cinema.</p>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">E-mail</label>
+                <input type="email" id="email" placeholder="seu@email.com" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Senha</label>
+                <input type="password" id="password" placeholder="••••••••" required>
+            </div>
+
+            <button type="submit" class="btn-login">Entrar</button>
+        </form>
+
+        <div class="extra-links">
+            <p>Não tem uma conta? <a onclick="register()">Criar conta agora</a></p>
+            <p style="margin-top: 10px;"><a href="#" style="color: #94a3b8; font-weight: 400;">Esqueceu sua senha?</a></p>
+        </div>
+    </div>
+
+    <script>
+        window.history.pushState({}, "", "/login");
+        function register() {
+            try {
+                window.location.href = '/register';
+            } catch (error) {
+                console.error('Erro ao redirecionar para a página de login:', error);
+                alert('Desculpe, ocorreu um erro ao tentar acessar a página de login. Por favor, tente novamente mais tarde.');
+            }
+        }
+
+        document.getElementById("loginForm").addEventListener("submit", login);
+
+function login(event) {
+
+    event.preventDefault();
+
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+
+    fetch('/api/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Erro ao fazer login');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.token) {
+            localStorage.setItem('token', data.token);
+            fetch('/dashboard')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erro ao carregar a página de dashboard');
+                    }
+                    return response.text();
+                })
+                .then(html => {
+                    document.open();
+                    document.write(html);
+                    document.close();
+                })
+                .catch(error => {
+                    console.error('Erro ao redirecionar para a página de dashboard:', error);
+                    alert('Desculpe, ocorreu um erro ao tentar acessar a página de dashboard. Por favor, tente novamente mais tarde.');
+                });
+        } else {
+            alert('Erro ao fazer login. Por favor, tente novamente.');
+        }
+    })
+    .catch(error => {
+        console.error('Erro durante o login:', error);
+        alert('Desculpe, ocorreu um erro ao tentar fazer o login. Por favor, tente novamente mais tarde.');
+    });}
+
+   
+    </script>
+
+</body>
+</html>
