@@ -12,4 +12,4 @@ yarn-error.log*
 
 # Sistema (macOS/Windows)
 .DS_Store
-Thumbs.db
+Thumbs.db.env
