@@ -1,3 +1,14 @@
+# Dependências (Nunca suba a node_modules!)
 node_modules/
-.env/
-dist/
+
+# Variáveis de Ambiente (Segurança!)
+.env
+.env.local
+
+# Logs e Debug
+npm-debug.log*
+yarn-error.log*
+
+# Sistema (macOS/Windows)
+.DS_Store
+Thumbs.db
