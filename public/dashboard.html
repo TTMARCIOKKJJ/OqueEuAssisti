@@ -1,29 +1,290 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="pt-br"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <meta http-equiv="Content-Security-Policy" content="img-src 'self' * data:">
+    <title>Stream Tracker Ultra v4</title>
+    <style>
+        :root {
+            --bg-color: #0a0a0c;
+            --card-bg: rgba(24, 24, 28, 0.95);
+            --input-bg: #1e1e22;
+            --text-color: #e1e1e6;
+            --accent: #00e5ff;
+            --assistindo: #00ff88;
+            --concluido: #007bff;
+            --querover: #ffc107;
+            --pausado: #ff4d4d;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at top right, #1a1a2e, transparent);
+            color: var(--text-color);
+            margin: 0; padding: 20px;
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        .controls, .search-area {
+            background: var(--card-bg); padding: 25px; border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column; gap: 15px;
+            max-width: 700px; width: 100%; margin-bottom: 20px; border: 1px solid #333;
+        }
+
+        .input-group { display: flex; gap: 10px; flex-wrap: wrap; }
+        input, select, textarea, button {
+            padding: 12px; border-radius: 8px; border: 1px solid #333;
+            background-color: var(--input-bg); color: white; transition: 0.3s;
+        }
+        
+        button { background-color: var(--accent); color: #000; font-weight: bold; border: none; cursor: pointer; }
+        .save-btn { background-color: var(--assistindo); margin-top: 5px; }
+        
+        /* --- GRID --- */
+        #mediaList {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px; width: 100%; max-width: 1200px;
+        }
+
+        .card {
+            background: var(--card-bg); border-radius: 12px; overflow: hidden;
+            border: 1px solid #222; transition: 0.3s; display: flex; flex-direction: column;
+        }
+        .card:hover { border-color: var(--accent); transform: translateY(-3px); }
+        
+        /* Status Badge */
+        .status-badge {
+            position: absolute; top: 10px; left: 10px; padding: 4px 8px;
+            border-radius: 4px; font-size: 10px; font-weight: bold; color: #000; z-index: 10;
+        }
+
+        /* Barra de Progresso */
+        .progress-container { background: #222; height: 6px; width: 100%; }
+        .progress-bar { height: 100%; transition: width 0.5s ease; }
+
+        .tag { position: absolute; top: 10px; right: 10px; padding: 4px 8px; border-radius: 4px; font-size: 10px; background: #333; z-index: 10;}
+        
+        .card-body { padding: 15px; flex-grow: 1; }
+        .card-footer { padding: 10px 15px; background: rgba(0,0,0,0.3); font-size: 11px; display: flex; justify-content: space-between; }
+        
+        .btn-mini { padding: 5px 10px; font-size: 10px; background: #333; color: white; }
+    </style>
 </head>
 <body>
-    home
 
-    <script>
-          window.history.pushState({}, "", "/dashboard");
-          const token = localStorage.getItem("token");
-var item = {
-    title: "Interestelar",
-    rating: 10
-  };
-fetch("/api/update", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    "Authorization": "Bearer " + token
-  },
-  
-  body: JSON.stringify({item})
-});
+    <h1>STREAM TRACKER ULTRA</h1>
+
+    <div class="controls">
+        <h3 id="formTitle" style="margin:0">Gerenciar Título</h3>
+        <input type="hidden" id="editId" value="">
+        
+        <div class="input-group">
+            <input type="text" id="inputName" placeholder="Nome do Título" style="flex:2">
+            <select id="inputCategory" style="flex:1">
+                <option value="Filme">Filme</option>
+                <option value="Série">Série</option>
+                <option value="Anime">Anime</option>
+                <option value="Desenho">Desenho</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <select id="inputStatus" style="flex:1">
+                <option value="Assistindo">🟢 Assistindo</option>
+                <option value="Concluído">🔵 Concluído</option>
+                <option value="Quero Ver">🟡 Quero Ver</option>
+                <option value="Pausado">🔴 Pausado</option>
+            </select>
+            <input type="number" id="inputAtual" placeholder="Ep/Temp Atual" style="flex:0.5">
+            <input type="number" id="inputTotal" placeholder="Total" style="flex:0.5">
+        </div>
+
+        <input type="text" id="inputImage" placeholder="URL da Capa (Ex: link do google imagens)">
+        <textarea id="inputProgress" placeholder="Anotações extras..."></textarea>
+        
+        <button onclick="saveItem()" id="btnMain">Salvar na Lista</button>
+        <button class="save-btn" onclick="exportarTudo()">💾 BAIXAR ARQUIVO ATUALIZADO (BACKUP)</button>
+    </div>
+
+    <div class="search-area">
+        <div class="input-group">
+            <input type="text" id="searchBox" placeholder="🔍 Buscar..." oninput="render()" style="flex:2">
+            <select id="filterCategory" onchange="render()" style="flex:1">
+                <option value="Todos">Todos (39)</option>
+                <option value="Filme">Filmes (15)</option>
+                <option value="Série">Séries (1)</option>
+                <option value="Anime">Animes (23)</option>
+                <option value="Desenho">Desenhos (0)</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="mediaList"></div>
+
+    <script id="dados-central">
+      window.history.pushState({}, "", "/dashboard");
+        let collection = [
+    {
+        "title": "titulo",
+        "category": "categoria",
+        "status": "status",
+        "atual": 1,
+        "total": 10,
+        "image": "src",
+        "progress": "VER",
+        "updatedAt": "2026-02-25T05:45:28.196Z",
+        "id": 1771998301815
+    }
+];
+
+        window.onload = () => { render(); };
+
+        function render() {
+            const list = document.getElementById('mediaList');
+            const search = document.getElementById('searchBox').value.toLowerCase();
+            const filter = document.getElementById('filterCategory').value || 'Todos';
+            
+            list.innerHTML = '';
+            updateFilterOptions();
+
+            let filtered = collection.filter(item => {
+                return (item.title.toLowerCase().includes(search)) && 
+                       (filter === 'Todos' || item.category === filter);
+            });
+
+            filtered.sort((a,b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+
+            filtered.forEach(item => {
+                const perc = (item.total > 0) ? Math.min((item.atual / item.total) * 100, 100) : 0;
+                const statusColors = { "Assistindo": "#00ff88", "Concluído": "#007bff", "Quero Ver": "#ffc107", "Pausado": "#ff4d4d" };
+                
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div style="position:relative; height:150px;">
+                        <span class="status-badge" style="background:${statusColors[item.status]}">${item.status}</span>
+                        <span class="tag">${item.category}</span>
+                        <img src="${item.image || 'https://via.placeholder.com/300x150?text=Sem+Capa'}" style="width:100%; height:100%; object-fit:cover;">
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar" style="width: ${perc}%; background: ${statusColors[item.status]}"></div>
+                    </div>
+                    <div class="card-body">
+                        <h3 style="margin:0; font-size:1.1em; color:var(--accent)">${item.title}</h3>
+                        <p style="font-size:12px; margin:10px 0; color:#aaa">${item.atual} / ${item.total} unidades</p>
+                        <div style="font-size:11px; color:#777 italic">${item.progress || ''}</div>
+                    </div>
+                    <div class="card-footer">
+                        <span>Modificado: ${new Date(item.updatedAt).toLocaleDateString()}</span>
+                        <div>
+                            <button class="btn-mini" onclick="editItem(${item.id})">✎</button>
+                            <button class="btn-mini" onclick="deleteItem(${item.id})" style="color:red">✕</button>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        function saveItem() {
+            const name = document.getElementById('inputName').value;
+            const editId = document.getElementById('editId').value;
+            if(!name) return alert("O nome é obrigatório!");
+
+            const data = {
+                title: name,
+                category: document.getElementById('inputCategory').value,
+                status: document.getElementById('inputStatus').value,
+                atual: parseInt(document.getElementById('inputAtual').value) || 0,
+                total: parseInt(document.getElementById('inputTotal').value) || 0,
+                image: document.getElementById('inputImage').value,
+                progress: document.getElementById('inputProgress').value,
+                updatedAt: new Date().toISOString()
+            };
+
+            if(editId) {
+                const idx = collection.findIndex(i => i.id == editId);
+                collection[idx] = { ...collection[idx], ...data };
+            } else {
+                data.id = Date.now();
+                collection.push(data);
+            }
+
+            clearForm();
+            render();
+        }
+
+        function editItem(id) {
+            const item = collection.find(i => i.id == id);
+            document.getElementById('editId').value = item.id;
+            document.getElementById('inputName').value = item.title;
+            document.getElementById('inputCategory').value = item.category;
+            document.getElementById('inputStatus').value = item.status;
+            document.getElementById('inputAtual').value = item.atual;
+            document.getElementById('inputTotal').value = item.total;
+            document.getElementById('inputImage').value = item.image;
+            document.getElementById('inputProgress').value = item.progress;
+            document.getElementById('formTitle').innerText = "Editando...";
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+
+        function deleteItem(id) {
+            if(confirm("Excluir?")) { collection = collection.filter(i => i.id != id); render(); }
+        }
+
+        function clearForm() {
+            document.getElementById('editId').value = '';
+            document.getElementById('inputName').value = '';
+            document.getElementById('inputAtual').value = '';
+            document.getElementById('inputTotal').value = '';
+            document.getElementById('inputImage').value = '';
+            document.getElementById('inputProgress').value = '';
+            document.getElementById('formTitle').innerText = "Gerenciar Título";
+        }
+
+        function updateFilterOptions() {
+            const fs = document.getElementById('filterCategory');
+            const cat = fs.value || 'Todos';
+            const counts = (c) => collection.filter(i => i.category === c).length;
+            fs.innerHTML = `
+                <option value="Todos">Todos (${collection.length})</option>
+                <option value="Filme">Filmes (${counts('Filme')})</option>
+                <option value="Série">Séries (${counts('Série')})</option>
+                <option value="Anime">Animes (${counts('Anime')})</option>
+                <option value="Desenho">Desenhos (${counts('Desenho')})</option>
+            `;
+            fs.value = cat;
+        }
+
+        function exportarTudo() {
+    // 1. Gera a data e a hora atual com apenas a hora
+    const agora = new Date();
+    const dia = String(agora.getDate()).padStart(2, '0');
+    const mes = String(agora.getDate()).padStart(2, '0'); // Janeiro é 0
+    const ano = agora.getFullYear();
+    const hora = agora.getHours();
+    
+    // Formata o sufixo: 18-02-2026_01h
+    const dataFormatada = `${dia}-${mes}-${ano}_${hora}h`;
+
+    // 2. Processa o código para salvar os dados
+    document.getElementById('mediaList').innerHTML = '';
+    let codigo = document.documentElement.outerHTML;
+    const novaData = "let collection = " + JSON.stringify(collection, null, 4) + ";";
+    const final = "<!DOCTYPE html>\n" + codigo.replace(/let collection = \[[\s\S]*?\];/, novaData);
+    
+    // 3. Gera o arquivo com o novo nome
+    const blob = new Blob([final], { type: "text/html" });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    
+    // Define o nome do arquivo com a data e hora
+    a.download = `meu-tracker_${dataFormatada}.html`; 
+    
+    a.click();
+}
     </script>
-</body>
-</html>
+
+</body></html>

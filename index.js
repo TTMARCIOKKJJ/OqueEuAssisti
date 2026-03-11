@@ -1,6 +1,7 @@
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import helmet from "helmet";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,12 +20,19 @@ app.use(cookieParser());
 app.use('/api', authRouter);
 app.use(redirectRouter);   
 
+app.use(helmet.contentSecurityPolicy({
+  directives: {
+    imgSrc: ["'self'", "data:", "https://images.unsplash.com"]
+  }
+}));
+
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'pages', 'index.html'));
 });
 
 
 export default app;
+
 
 
 

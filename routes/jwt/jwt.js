@@ -1,11 +1,18 @@
 import jwt from "jsonwebtoken";
+import path from 'path';
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+
 
 export function decodejwt(req, res, next) {
 
   const token = req.cookies.token;
 
   if (!token) {
-    return res.status(401).json({ message: "Token missing" });
+    return res.sendFile(path.join(__dirname,'..','..','public','login.html'));
+    
   }
 
   try {
@@ -17,8 +24,8 @@ export function decodejwt(req, res, next) {
     next();
 
   } catch {
-
-    res.status(401).json({ message: "Invalid or expired token" });
+    res.sendfile(path.join(__dirname,  'login.html'));
+    
 
   }
 
