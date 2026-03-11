@@ -227,7 +227,7 @@ img-src 'self' https://images.unsplash.com;
         
         <div class="auth-buttons">
             <a onclick="login()" class="btn btn-outline">Entrar na minha conta</a>
-            <a href="#" class="btn btn-primary">Criar Conta Grátis</a>
+            <a onclick="register()" class="btn btn-primary">Criar Conta Grátis</a>
         </div>
     </section>
 
@@ -257,6 +257,30 @@ img-src 'self' https://images.unsplash.com;
             } catch (error) {
                 console.error('Erro ao redirecionar para a página de login:', error);
                 alert('Desculpe, ocorreu um erro ao tentar acessar a página de login. Por favor, tente novamente mais tarde.');
+            }
+        }
+
+        function register() {
+            try {
+                fetch('/register')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Erro ao carregar a página de registro');
+                        }
+                        return response.text();
+                    })
+                    .then(html => {
+                        document.open();
+                        document.write(html);
+                        document.close();
+                    })
+                    .catch(error => {
+                        console.error('Erro ao redirecionar para a página de registro:', error);
+                        alert('Desculpe, ocorreu um erro ao tentar acessar a página de registro. Por favor, tente novamente mais tarde.');
+                    });
+            } catch (error) {
+                console.error('Erro ao redirecionar para a página de registro:', error);
+                alert('Desculpe, ocorreu um erro ao tentar acessar a página de registro. Por favor, tente novamente mais tarde.');
             }
         }
     </script>
