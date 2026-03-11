@@ -24,7 +24,7 @@ export function decodejwt(req, res, next) {
     next();
 
   } catch {
-    res.sendfile(path.join(__dirname,  'login.html'));
+    return res.sendFile(path.join(__dirname,'..','..','public','login.html'));
     
 
   }

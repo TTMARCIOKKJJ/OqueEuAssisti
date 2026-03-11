@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+    <link rel="icon" type="image/png" href="src/image.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - O que eu assisti</title>
@@ -202,6 +203,7 @@ function login(event) {
         }
         return response.json();
     })
+    
     .then(data => {
         if (data.token) {
             localStorage.setItem('token', data.token);

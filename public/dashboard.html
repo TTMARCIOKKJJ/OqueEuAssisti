@@ -1,8 +1,11 @@
 <!DOCTYPE html>
-<html lang="pt-br"><head>
+<html lang="pt-br">
+<head>
+    <link rel="icon" type="image/png" href="src/image.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="img-src 'self' * data:">
+    <meta http-equiv="Content-Security-Policy"
+      content="img-src 'self' https://images.unsplash.com https://via.placeholder.com data:;">
     <title>Stream Tracker Ultra v4</title>
     <style>
         :root {
@@ -42,7 +45,6 @@
         button { background-color: var(--accent); color: #000; font-weight: bold; border: none; cursor: pointer; }
         .save-btn { background-color: var(--assistindo); margin-top: 5px; }
         
-        /* --- GRID --- */
         #mediaList {
             display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 20px; width: 100%; max-width: 1200px;
@@ -51,25 +53,25 @@
         .card {
             background: var(--card-bg); border-radius: 12px; overflow: hidden;
             border: 1px solid #222; transition: 0.3s; display: flex; flex-direction: column;
+            position: relative;
         }
         .card:hover { border-color: var(--accent); transform: translateY(-3px); }
         
-        /* Status Badge */
         .status-badge {
             position: absolute; top: 10px; left: 10px; padding: 4px 8px;
             border-radius: 4px; font-size: 10px; font-weight: bold; color: #000; z-index: 10;
         }
 
-        /* Barra de Progresso */
         .progress-container { background: #222; height: 6px; width: 100%; }
         .progress-bar { height: 100%; transition: width 0.5s ease; }
 
         .tag { position: absolute; top: 10px; right: 10px; padding: 4px 8px; border-radius: 4px; font-size: 10px; background: #333; z-index: 10;}
         
         .card-body { padding: 15px; flex-grow: 1; }
-        .card-footer { padding: 10px 15px; background: rgba(0,0,0,0.3); font-size: 11px; display: flex; justify-content: space-between; }
+        .card-footer { padding: 10px 15px; background: rgba(0,0,0,0.3); font-size: 11px; display: flex; justify-content: space-between; align-items: center; }
         
-        .btn-mini { padding: 5px 10px; font-size: 10px; background: #333; color: white; }
+        .btn-mini { padding: 5px 10px; font-size: 10px; background: #333; color: white; border: none; cursor: pointer; border-radius: 4px; }
+        .btn-mini:hover { background: #444; }
     </style>
 </head>
 <body>
@@ -112,11 +114,11 @@
         <div class="input-group">
             <input type="text" id="searchBox" placeholder="🔍 Buscar..." oninput="render()" style="flex:2">
             <select id="filterCategory" onchange="render()" style="flex:1">
-                <option value="Todos">Todos (39)</option>
-                <option value="Filme">Filmes (15)</option>
-                <option value="Série">Séries (1)</option>
-                <option value="Anime">Animes (23)</option>
-                <option value="Desenho">Desenhos (0)</option>
+                <option value="Todos">Todos</option>
+                <option value="Filme">Filmes</option>
+                <option value="Série">Séries</option>
+                <option value="Anime">Animes</option>
+                <option value="Desenho">Desenhos</option>
             </select>
         </div>
     </div>
@@ -124,22 +126,27 @@
     <div id="mediaList"></div>
 
     <script id="dados-central">
-      window.history.pushState({}, "", "/dashboard");
-        let collection = [
-    {
-        "title": "titulo",
-        "category": "categoria",
-        "status": "status",
-        "atual": 1,
-        "total": 10,
-        "image": "src",
-        "progress": "VER",
-        "updatedAt": "2026-02-25T05:45:28.196Z",
-        "id": 1771998301815
-    }
-];
+        window.history.pushState({}, "", "/dashboard");
+        let collection = [];
 
-        window.onload = () => { render(); };
+        // Inicialização
+        window.onload = async () => {
+            await fetchData();
+        };
+
+        async function fetchData() {
+            try {
+                const response = await fetch('/api/data');
+                if (!response.ok) throw new Error('Erro ao buscar dados');
+                collection = await response.json();
+                render();
+                
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+                // Caso não tenha API rodando agora, renderiza o que tiver
+                render();
+            }
+        }
 
         function render() {
             const list = document.getElementById('mediaList');
@@ -149,38 +156,45 @@
             list.innerHTML = '';
             updateFilterOptions();
 
-            let filtered = collection.filter(item => {
-                return (item.title.toLowerCase().includes(search)) && 
+            const filtered = collection.filter(item => {
+                const title = item.title || "";
+                return title.toLowerCase().includes(search) && 
                        (filter === 'Todos' || item.category === filter);
             });
 
             filtered.sort((a,b) => new Date(b.updatedAt) - new Date(a.updatedAt));
 
+            const statusColors = { "Assistindo": "#00ff88", "Concluído": "#007bff", "Quero Ver": "#ffc107", "Pausado": "#ff4d4d" };
+
+            if (filtered.length === 0) {
+                list.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:#777;">Nenhum título encontrado.</p>`;
+                return;
+            }
+
             filtered.forEach(item => {
                 const perc = (item.total > 0) ? Math.min((item.atual / item.total) * 100, 100) : 0;
-                const statusColors = { "Assistindo": "#00ff88", "Concluído": "#007bff", "Quero Ver": "#ffc107", "Pausado": "#ff4d4d" };
-                
+
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.innerHTML = `
                     <div style="position:relative; height:150px;">
-                        <span class="status-badge" style="background:${statusColors[item.status]}">${item.status}</span>
-                        <span class="tag">${item.category}</span>
+                        <span class="status-badge" style="background:${statusColors[item.status] || '#777'}">${item.status}</span>
+                        <span class="tag">${item.category || ''}</span>
                         <img src="${item.image || 'https://via.placeholder.com/300x150?text=Sem+Capa'}" style="width:100%; height:100%; object-fit:cover;">
                     </div>
                     <div class="progress-container">
-                        <div class="progress-bar" style="width: ${perc}%; background: ${statusColors[item.status]}"></div>
+                        <div class="progress-bar" style="width: ${perc}%; background: ${statusColors[item.status] || '#777'}"></div>
                     </div>
                     <div class="card-body">
-                        <h3 style="margin:0; font-size:1.1em; color:var(--accent)">${item.title}</h3>
-                        <p style="font-size:12px; margin:10px 0; color:#aaa">${item.atual} / ${item.total} unidades</p>
-                        <div style="font-size:11px; color:#777 italic">${item.progress || ''}</div>
+                        <h3 style="margin:0; font-size:1.1em; color:var(--accent)">${item.title || ''}</h3>
+                        <p style="font-size:12px; margin:10px 0; color:#aaa">${item.atual || 0} / ${item.total || 0} unidades</p>
+                        <div style="font-size:11px; color:#777; font-style:italic;">${item.progress || ''}</div>
                     </div>
                     <div class="card-footer">
-                        <span>Modificado: ${new Date(item.updatedAt).toLocaleDateString()}</span>
+                        <span>${item.updatedAt ? new Date(item.updatedAt).toLocaleDateString() : 'Sem data'}</span>
                         <div>
                             <button class="btn-mini" onclick="editItem(${item.id})">✎</button>
-                            <button class="btn-mini" onclick="deleteItem(${item.id})" style="color:red">✕</button>
+                            <button class="btn-mini" onclick="deleteItem(${item.id})" style="color:#ff4d4d">✕</button>
                         </div>
                     </div>
                 `;
@@ -188,9 +202,10 @@
             });
         }
 
-        function saveItem() {
+        async function saveItem() {
             const name = document.getElementById('inputName').value;
             const editId = document.getElementById('editId').value;
+            
             if(!name) return alert("O nome é obrigatório!");
 
             const data = {
@@ -206,32 +221,54 @@
 
             if(editId) {
                 const idx = collection.findIndex(i => i.id == editId);
-                collection[idx] = { ...collection[idx], ...data };
+                if(idx !== -1) collection[idx] = { ...collection[idx], ...data };
             } else {
                 data.id = Date.now();
                 collection.push(data);
             }
 
+            // Sincroniza com o servidor
+            try {
+                await fetch('/api/update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(collection)
+                });
+            } catch (e) { console.error("Erro ao salvar no servidor", e); }
+
             clearForm();
             render();
+            window.location.reload();
         }
 
         function editItem(id) {
             const item = collection.find(i => i.id == id);
+            if(!item) return;
+
             document.getElementById('editId').value = item.id;
             document.getElementById('inputName').value = item.title;
             document.getElementById('inputCategory').value = item.category;
             document.getElementById('inputStatus').value = item.status;
             document.getElementById('inputAtual').value = item.atual;
             document.getElementById('inputTotal').value = item.total;
-            document.getElementById('inputImage').value = item.image;
-            document.getElementById('inputProgress').value = item.progress;
+            document.getElementById('inputImage').value = item.image || '';
+            document.getElementById('inputProgress').value = item.progress || '';
             document.getElementById('formTitle').innerText = "Editando...";
             window.scrollTo({top: 0, behavior: 'smooth'});
         }
 
-        function deleteItem(id) {
-            if(confirm("Excluir?")) { collection = collection.filter(i => i.id != id); render(); }
+        async function deleteItem(id) {
+            if(confirm("Deseja realmente excluir este título?")) {
+                collection = collection.filter(i => i.id != id);
+                try {
+                    await fetch('/api/update', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(collection)
+                    });
+                } catch (e) { console.error("Erro ao excluir no servidor", e); }
+                render();
+            }
         }
 
         function clearForm() {
@@ -246,45 +283,39 @@
 
         function updateFilterOptions() {
             const fs = document.getElementById('filterCategory');
-            const cat = fs.value || 'Todos';
-            const counts = (c) => collection.filter(i => i.category === c).length;
+            const current = fs.value;
+            const count = (cat) => collection.filter(i => i.category === cat).length;
+            
             fs.innerHTML = `
                 <option value="Todos">Todos (${collection.length})</option>
-                <option value="Filme">Filmes (${counts('Filme')})</option>
-                <option value="Série">Séries (${counts('Série')})</option>
-                <option value="Anime">Animes (${counts('Anime')})</option>
-                <option value="Desenho">Desenhos (${counts('Desenho')})</option>
+                <option value="Filme">Filmes (${count('Filme')})</option>
+                <option value="Série">Séries (${count('Série')})</option>
+                <option value="Anime">Animes (${count('Anime')})</option>
+                <option value="Desenho">Desenhos (${count('Desenho')})</option>
             `;
-            fs.value = cat;
+            fs.value = current;
         }
 
         function exportarTudo() {
-    // 1. Gera a data e a hora atual com apenas a hora
-    const agora = new Date();
-    const dia = String(agora.getDate()).padStart(2, '0');
-    const mes = String(agora.getDate()).padStart(2, '0'); // Janeiro é 0
-    const ano = agora.getFullYear();
-    const hora = agora.getHours();
-    
-    // Formata o sufixo: 18-02-2026_01h
-    const dataFormatada = `${dia}-${mes}-${ano}_${hora}h`;
-
-    // 2. Processa o código para salvar os dados
-    document.getElementById('mediaList').innerHTML = '';
-    let codigo = document.documentElement.outerHTML;
-    const novaData = "let collection = " + JSON.stringify(collection, null, 4) + ";";
-    const final = "<!DOCTYPE html>\n" + codigo.replace(/let collection = \[[\s\S]*?\];/, novaData);
-    
-    // 3. Gera o arquivo com o novo nome
-    const blob = new Blob([final], { type: "text/html" });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    
-    // Define o nome do arquivo com a data e hora
-    a.download = `meu-tracker_${dataFormatada}.html`; 
-    
-    a.click();
-}
+            const agora = new Date();
+            const dataF = `${agora.getDate()}-${agora.getMonth()+1}-${agora.getFullYear()}_${agora.getHours()}h`;
+            
+            // Limpa o formulário antes de clonar o HTML para o backup não vir com lixo
+            clearForm();
+            
+            let codigo = document.documentElement.outerHTML;
+            const novaData = "let collection = " + JSON.stringify(collection, null, 4) + ";";
+            
+            // Substitui a variável collection no script para o arquivo baixado já vir com os dados
+            const final = "<!DOCTYPE html>\n" + codigo.replace(/let collection = \[[\s\S]*?\];/, novaData);
+            
+            const blob = new Blob([final], { type: "text/html" });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `meu-tracker_${dataF}.html`; 
+            a.click();
+        }
     </script>
 
-</body></html>
+</body>
+</html>
