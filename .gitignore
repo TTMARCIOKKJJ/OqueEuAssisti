@@ -4,6 +4,7 @@ node_modules/
 # Variáveis de Ambiente (Segurança!)
 .env
 .env.local
+.env/
 
 # Logs e Debug
 npm-debug.log*
